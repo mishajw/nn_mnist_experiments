@@ -6,8 +6,8 @@ import argparse
 import tensorflow as tf
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--data_dir', type=str, default='/tmp/tensorflow/mnist/input_data',
-                    help='Directory for storing input data')
+parser.add_argument(
+    "--data_dir", type=str, default="/tmp/tensorflow/mnist/input_data", help="Directory for storing input data")
 
 
 def main():
@@ -44,5 +44,5 @@ def main():
         }))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
