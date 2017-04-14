@@ -19,7 +19,7 @@ class SimpleModel:
         for i, hidden_layer_size in enumerate(layers):
             with tf.name_scope("layer" + str(i)):
                 weights = tf.Variable(
-                    tf.zeros([int(current_input.shape[1]), hidden_layer_size]),
+                    tf.random_normal([int(current_input.shape[1]), hidden_layer_size]),
                     name="weights")
 
                 biases = tf.Variable(
