@@ -26,13 +26,19 @@ class SimpleModel:
                     tf.zeros([hidden_layer_size]),
                     name="biases")
 
-                with tf.name_scope("weights_summary"):
-                    self.tensor_summary(weights)
+                logits = tf.matmul(current_input, weights) + biases
 
-                with tf.name_scope("biases_summary"):
-                    self.tensor_summary(biases)
+                current_input = tf.nn.relu(logits)
 
-                current_input = tf.nn.sigmoid(tf.matmul(current_input, weights) + biases)
+                with tf.name_scope("summary"):
+                    with tf.name_scope("weights"):
+                        self.tensor_summary(weights)
+
+                    with tf.name_scope("biases"):
+                        self.tensor_summary(biases)
+
+                    negative_logits = tf.reduce_mean(tf.cast(tf.equal(tf.sign(logits), -1), tf.float32))
+                    tf.summary.scalar("negative_logits", negative_logits)
 
         self.output = current_input
 
