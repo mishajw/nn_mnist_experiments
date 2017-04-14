@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from datetime import datetime
-from simple_model import SimpleModel
+from hidden_costs_model import HiddenCostsModel
 from tensorflow.examples.tutorials.mnist import input_data
 import argparse
 import tensorflow as tf
@@ -29,7 +29,7 @@ def main():
 
     # Get model
     with tf.name_scope("model"):
-        model = SimpleModel(unknown_args, model_input, model_truth_output)
+        model = HiddenCostsModel(unknown_args, model_input, model_truth_output)
 
     # Define optimizer
     optimizer = tf.train.AdamOptimizer(learning_rate).minimize(model.cost)
