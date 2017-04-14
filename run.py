@@ -12,7 +12,7 @@ parser.add_argument("--learning_rate", type=float, default=0.01)
 
 
 def main():
-    args = parser.parse_args()
+    args, unknown_args = parser.parse_known_args()
 
     learning_rate = args.learning_rate
 
@@ -20,7 +20,7 @@ def main():
     mnist = input_data.read_data_sets(args.data_dir, one_hot=True)
 
     # Get model
-    model = SimpleModel()
+    model = SimpleModel(unknown_args)
 
     # Define loss and optimizer
     truth = tf.placeholder(tf.float32, [None, 10])

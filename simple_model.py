@@ -1,17 +1,22 @@
 #!/usr/bin/env python
 
+import argparse
 import tensorflow as tf
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--layers", type=str, default="500,10")
 
 
 class SimpleModel:
-    HIDDEN_LAYER_SIZES = [50, 10]
+    def __init__(self, unparsed_args):
+        args = parser.parse_args(unparsed_args)
+        layers = [int(s) for s in args.layers.split(",")]
 
-    def __init__(self):
         self.image_input = tf.placeholder(tf.float32, [None, 784])
 
         current_input = self.image_input
 
-        for i, hidden_layer_size in enumerate(self.HIDDEN_LAYER_SIZES):
+        for i, hidden_layer_size in enumerate(layers):
             weights = tf.Variable(
                 tf.zeros([int(current_input.shape[1]), hidden_layer_size]),
                 "weights" + str(i))
