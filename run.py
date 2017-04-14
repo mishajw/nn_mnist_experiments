@@ -35,7 +35,7 @@ def main():
             tf.nn.softmax_cross_entropy_with_logits(labels=truth, logits=model.output), name="cost")
         tf.summary.scalar("cost_summary", cost)
 
-    optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(cost)
+    optimizer = tf.train.AdamOptimizer(learning_rate).minimize(cost)
 
     # Define accuracy
     with tf.name_scope("accuracy_calculation"):
