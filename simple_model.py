@@ -26,6 +26,22 @@ class SimpleModel:
                     tf.zeros([hidden_layer_size]),
                     name="biases")
 
+                with tf.name_scope("weights_summary"):
+                    self.tensor_summary(weights)
+
+                with tf.name_scope("biases_summary"):
+                    self.tensor_summary(biases)
+
                 current_input = tf.nn.sigmoid(tf.matmul(current_input, weights) + biases)
 
         self.output = tf.nn.softmax(current_input, name="output")
+
+    @staticmethod
+    def tensor_summary(t):
+        t_mean = tf.reduce_mean(t)
+        t_stddev = tf.sqrt(tf.reduce_mean(tf.square(tf.subtract(t, t_mean))))
+
+        tf.summary.scalar("mean", t_mean)
+        tf.summary.scalar("stddev", t_stddev)
+        tf.summary.scalar("max", tf.reduce_max(t))
+        tf.summary.scalar("min", tf.reduce_min(t))
