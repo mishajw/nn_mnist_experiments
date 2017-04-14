@@ -24,19 +24,24 @@ def main():
     mnist = input_data.read_data_sets(args.data_dir, one_hot=True)
 
     # Get model
-    model = SimpleModel(unknown_args)
+    with tf.name_scope("model"):
+        model = SimpleModel(unknown_args)
 
     # Define loss and optimizer
-    truth = tf.placeholder(tf.float32, [None, 10])
-    cost = tf.reduce_mean(
-        tf.nn.softmax_cross_entropy_with_logits(labels=truth, logits=model.guesses))
-    train_step = tf.train.GradientDescentOptimizer(learning_rate).minimize(cost)
-    tf.summary.scalar("cost", cost)
+    truth = tf.placeholder(tf.float32, [None, 10], name="truth")
+
+    with tf.name_scope("cost_calculation"):
+        cost = tf.reduce_mean(
+            tf.nn.softmax_cross_entropy_with_logits(labels=truth, logits=model.output), name="cost")
+        tf.summary.scalar("cost_summary", cost)
+
+    optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(cost)
 
     # Define accuracy
-    correct_prediction = tf.equal(tf.argmax(model.guesses, 1), tf.argmax(truth, 1))
-    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-    tf.summary.scalar("accuracy", accuracy)
+    with tf.name_scope("accuracy_calculation"):
+        correct_prediction = tf.equal(tf.argmax(model.output, 1), tf.argmax(truth, 1), name="correct_prediction")
+        accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32), name="accuracy")
+        tf.summary.scalar("accuracy_summary", accuracy)
 
     sess = tf.InteractiveSession()
     tf.global_variables_initializer().run()
@@ -51,9 +56,9 @@ def main():
     for step_number in range(training_steps):
         batch_xs, batch_ys = mnist.train.next_batch(100)
         _, all_train_summaries = sess.run(
-            [train_step, all_summaries],
+            [optimizer, all_summaries],
             feed_dict={
-                model.image_input: batch_xs,
+                model.input: batch_xs,
                 truth: batch_ys
             })
 
@@ -64,7 +69,7 @@ def main():
             all_test_summaries = sess.run(
                 all_summaries,
                 feed_dict={
-                    model.image_input: mnist.test.images,
+                    model.input: mnist.test.images,
                     truth: mnist.test.labels
                 })
 

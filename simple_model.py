@@ -12,9 +12,9 @@ class SimpleModel:
         args = parser.parse_args(unparsed_args)
         layers = [int(s) for s in args.layers.split(",")]
 
-        self.image_input = tf.placeholder(tf.float32, [None, 784])
+        self.input = tf.placeholder(tf.float32, [None, 784], name="input")
 
-        current_input = self.image_input
+        current_input = self.input
 
         for i, hidden_layer_size in enumerate(layers):
             with tf.name_scope("layer" + str(i)):
@@ -28,4 +28,4 @@ class SimpleModel:
 
                 current_input = tf.nn.sigmoid(tf.matmul(current_input, weights) + biases)
 
-        self.guesses = tf.nn.softmax(current_input)
+        self.output = tf.nn.softmax(current_input, name="output")
