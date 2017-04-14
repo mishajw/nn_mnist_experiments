@@ -18,29 +18,10 @@ class SimpleModel:
 
         for i, hidden_layer_size in enumerate(layers):
             with tf.name_scope("layer" + str(i)):
-                weights = tf.Variable(
-                    tf.random_normal([int(current_input.shape[1]), hidden_layer_size]),
-                    name="weights")
-
-                biases = tf.Variable(
-                    tf.zeros([hidden_layer_size]),
-                    name="biases")
-
-                logits = tf.matmul(current_input, weights) + biases
-
+                logits = self.logit_component(current_input, hidden_layer_size)
                 current_input = tf.nn.relu(logits)
 
-                with tf.name_scope("summary"):
-                    with tf.name_scope("weights"):
-                        self.tensor_summary(weights)
-
-                    with tf.name_scope("biases"):
-                        self.tensor_summary(biases)
-
-                    negative_logits = tf.reduce_mean(tf.cast(tf.equal(tf.sign(logits), -1), tf.float32))
-                    tf.summary.scalar("negative_logits", negative_logits)
-
-        self.output = current_input
+        self.output = self.logit_component(current_input, 10)
 
     @staticmethod
     def tensor_summary(t):
@@ -51,3 +32,26 @@ class SimpleModel:
         tf.summary.scalar("stddev", t_stddev)
         tf.summary.scalar("max", tf.reduce_max(t))
         tf.summary.scalar("min", tf.reduce_min(t))
+
+    def logit_component(self, layer_input, size):
+        weights = tf.Variable(
+            tf.random_normal([int(layer_input.shape[1]), size]),
+            name="weights")
+
+        biases = tf.Variable(
+            tf.zeros([size]),
+            name="biases")
+
+        logits = tf.matmul(layer_input, weights) + biases
+
+        with tf.name_scope("summary"):
+            with tf.name_scope("weights"):
+                self.tensor_summary(weights)
+
+            with tf.name_scope("biases"):
+                self.tensor_summary(biases)
+
+            negative_logits = tf.reduce_mean(tf.cast(tf.equal(tf.sign(logits), -1), tf.float32))
+            tf.summary.scalar("negative_logits", negative_logits)
+
+        return logits
