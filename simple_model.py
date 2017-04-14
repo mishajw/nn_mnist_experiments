@@ -9,9 +9,14 @@ parser.add_argument("--layers", type=str, default="500,10")
 
 class SimpleModel:
     def __init__(self, unparsed_args, model_input):
+        self.output = None
+
         args = parser.parse_args(unparsed_args)
         layers = [int(s) for s in args.layers.split(",")]
 
+        self.create_guess_component(model_input, layers)
+
+    def create_guess_component(self, model_input, layers):
         current_input = model_input
 
         for i, hidden_layer_size in enumerate(layers):
