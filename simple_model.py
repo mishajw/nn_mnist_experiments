@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from model import Model
 import argparse
 import tensorflow as tf
 
@@ -7,20 +8,19 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--layers", type=str, default="500,10")
 
 
-class SimpleModel:
-    def __init__(self, unparsed_args, model_input, model_truth_output):
-        self.output = None
-        self.cost = None
+class SimpleModel(Model):
+    def __init__(self, unparsed_args, _input, _truth_output):
+        super().__init__(_input, _truth_output)
 
         args = parser.parse_args(unparsed_args)
         layers = [int(s) for s in args.layers.split(",")]
 
-        self.create_guess_component(model_input, layers)
+        self.create_guess_component(layers)
 
-        self.create_cost_component(model_truth_output)
+        self.create_cost_component()
 
-    def create_guess_component(self, model_input, layers):
-        current_input = model_input
+    def create_guess_component(self, layers):
+        current_input = self.input
 
         for i, hidden_layer_size in enumerate(layers):
             with tf.name_scope("layer" + str(i)):
@@ -29,9 +29,9 @@ class SimpleModel:
 
         self.output = self.logit_component(current_input, 10)
 
-    def create_cost_component(self, model_truth_output):
+    def create_cost_component(self):
         self.cost = tf.reduce_mean(
-            tf.nn.softmax_cross_entropy_with_logits(labels=model_truth_output, logits=self.output), name="cost")
+            tf.nn.softmax_cross_entropy_with_logits(labels=self.truth_output, logits=self.output), name="cost")
         tf.summary.scalar("cost_summary", self.cost)
 
     @staticmethod
