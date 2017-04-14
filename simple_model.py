@@ -18,7 +18,8 @@ class SimpleModel(Model):
 
         self.create_guess_component(layers)
 
-        self.create_cost_component()
+        with tf.name_scope("cost"):
+            self.create_cost_component()
 
     def create_guess_component(self, layers):
         current_input = self.input
@@ -28,11 +29,12 @@ class SimpleModel(Model):
                 logits = help.logit_component(current_input, hidden_layer_size)
                 current_input = tf.nn.relu(logits)
 
-        self.output = help.logit_component(current_input, 10)
+        with tf.name_scope("final_layer"):
+            self.output = help.logit_component(current_input, 10)
 
     def create_cost_component(self):
         self.cost = tf.reduce_mean(
             tf.nn.softmax_cross_entropy_with_logits(labels=self.truth_output, logits=self.output), name="cost")
-        tf.summary.scalar("cost_summary", self.cost)
+        tf.summary.scalar("summary", self.cost)
 
 

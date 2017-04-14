@@ -39,7 +39,7 @@ def main():
         correct_prediction = tf.equal(
             tf.argmax(model.output, 1), tf.argmax(model_truth_output, 1), name="correct_prediction")
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32), name="accuracy")
-        tf.summary.scalar("accuracy_summary", accuracy)
+        tf.summary.scalar("summary", accuracy)
 
     sess = tf.InteractiveSession()
     tf.global_variables_initializer().run()
