@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from datetime import datetime
 from simple_model import SimpleModel
 from tensorflow.examples.tutorials.mnist import input_data
 import argparse
@@ -30,27 +31,44 @@ def main():
     cross_entropy = tf.reduce_mean(
         tf.nn.softmax_cross_entropy_with_logits(labels=truth, logits=model.guesses))
     train_step = tf.train.GradientDescentOptimizer(learning_rate).minimize(cross_entropy)
+    tf.summary.scalar("cross_entropy", cross_entropy)
 
     # Define accuracy
     correct_prediction = tf.equal(tf.argmax(model.guesses, 1), tf.argmax(truth, 1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+    tf.summary.scalar("accuracy", accuracy)
 
     sess = tf.InteractiveSession()
     tf.global_variables_initializer().run()
 
+    # Set up writers
+    time_formatted = datetime.now().strftime("%Y%m%d-%H%M%S")
+    train_writer = tf.summary.FileWriter("/tmp/nn_mnist_experiments/" + time_formatted + "/train", sess.graph)
+    test_writer = tf.summary.FileWriter("/tmp/nn_mnist_experiments/" + time_formatted + "/test", sess.graph)
+    all_summaries = tf.summary.merge_all()
+
     # Train
     for step_number in range(training_steps):
         batch_xs, batch_ys = mnist.train.next_batch(100)
-        sess.run(train_step, feed_dict={model.image_input: batch_xs, truth: batch_ys})
+        _, all_train_summaries = sess.run(
+            [train_step, all_summaries],
+            feed_dict={
+                model.image_input: batch_xs,
+                truth: batch_ys
+            })
+
+        train_writer.add_summary(all_train_summaries, step_number)
 
         if step_number % display_step == 0:
             # Test trained model
-            print(sess.run(
-                accuracy,
+            all_test_summaries = sess.run(
+                all_summaries,
                 feed_dict={
                     model.image_input: mnist.test.images,
                     truth: mnist.test.labels
-                }))
+                })
+
+            test_writer.add_summary(all_test_summaries, step_number)
 
 
 if __name__ == "__main__":
