@@ -23,9 +23,12 @@ def main():
     # Import data
     mnist = input_data.read_data_sets(args.data_dir, one_hot=True)
 
+    # Define input
+    model_input = tf.placeholder(tf.float32, [None, 784], name="input")
+
     # Get model
     with tf.name_scope("model"):
-        model = SimpleModel(unknown_args)
+        model = SimpleModel(unknown_args, model_input)
 
     # Define loss and optimizer
     truth = tf.placeholder(tf.float32, [None, 10], name="truth")
@@ -58,7 +61,7 @@ def main():
         _, all_train_summaries = sess.run(
             [optimizer, all_summaries],
             feed_dict={
-                model.input: batch_xs,
+                model_input: batch_xs,
                 truth: batch_ys
             })
 
@@ -69,7 +72,7 @@ def main():
             all_test_summaries = sess.run(
                 all_summaries,
                 feed_dict={
-                    model.input: mnist.test.images,
+                    model_input: mnist.test.images,
                     truth: mnist.test.labels
                 })
 

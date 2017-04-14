@@ -8,13 +8,11 @@ parser.add_argument("--layers", type=str, default="500,10")
 
 
 class SimpleModel:
-    def __init__(self, unparsed_args):
+    def __init__(self, unparsed_args, model_input):
         args = parser.parse_args(unparsed_args)
         layers = [int(s) for s in args.layers.split(",")]
 
-        self.input = tf.placeholder(tf.float32, [None, 784], name="input")
-
-        current_input = self.input
+        current_input = model_input
 
         for i, hidden_layer_size in enumerate(layers):
             with tf.name_scope("layer" + str(i)):
