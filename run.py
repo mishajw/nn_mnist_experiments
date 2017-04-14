@@ -8,10 +8,13 @@ import tensorflow as tf
 parser = argparse.ArgumentParser()
 parser.add_argument(
     "--data_dir", type=str, default="/tmp/tensorflow/mnist/input_data", help="Directory for storing input data")
+parser.add_argument("--learning_rate", type=float, default=0.01)
 
 
 def main():
     args = parser.parse_args()
+
+    learning_rate = args.learning_rate
 
     # Import data
     mnist = input_data.read_data_sets(args.data_dir, one_hot=True)
@@ -23,7 +26,7 @@ def main():
     truth = tf.placeholder(tf.float32, [None, 10])
     cross_entropy = tf.reduce_mean(
         tf.nn.softmax_cross_entropy_with_logits(labels=truth, logits=model.guesses))
-    train_step = tf.train.GradientDescentOptimizer(0.5).minimize(cross_entropy)
+    train_step = tf.train.GradientDescentOptimizer(learning_rate).minimize(cross_entropy)
 
     sess = tf.InteractiveSession()
     tf.global_variables_initializer().run()
