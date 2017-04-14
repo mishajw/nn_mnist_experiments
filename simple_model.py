@@ -34,7 +34,7 @@ class SimpleModel:
 
                 current_input = tf.nn.sigmoid(tf.matmul(current_input, weights) + biases)
 
-        self.output = tf.nn.softmax(current_input, name="output")
+        self.output = current_input
 
     @staticmethod
     def tensor_summary(t):
