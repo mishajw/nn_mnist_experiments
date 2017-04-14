@@ -28,10 +28,10 @@ def main():
 
     # Define loss and optimizer
     truth = tf.placeholder(tf.float32, [None, 10])
-    cross_entropy = tf.reduce_mean(
+    cost = tf.reduce_mean(
         tf.nn.softmax_cross_entropy_with_logits(labels=truth, logits=model.guesses))
-    train_step = tf.train.GradientDescentOptimizer(learning_rate).minimize(cross_entropy)
-    tf.summary.scalar("cross_entropy", cross_entropy)
+    train_step = tf.train.GradientDescentOptimizer(learning_rate).minimize(cost)
+    tf.summary.scalar("cost", cost)
 
     # Define accuracy
     correct_prediction = tf.equal(tf.argmax(model.guesses, 1), tf.argmax(truth, 1))
