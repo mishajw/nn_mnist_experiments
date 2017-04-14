@@ -23,26 +23,21 @@ def main():
     # Import data
     mnist = input_data.read_data_sets(args.data_dir, one_hot=True)
 
-    # Define input
+    # Define input and model_truth_output output
     model_input = tf.placeholder(tf.float32, [None, 784], name="input")
+    model_truth_output = tf.placeholder(tf.float32, [None, 10], name="model_truth_output")
 
     # Get model
     with tf.name_scope("model"):
-        model = SimpleModel(unknown_args, model_input)
+        model = SimpleModel(unknown_args, model_input, model_truth_output)
 
-    # Define loss and optimizer
-    truth = tf.placeholder(tf.float32, [None, 10], name="truth")
-
-    with tf.name_scope("cost_calculation"):
-        cost = tf.reduce_mean(
-            tf.nn.softmax_cross_entropy_with_logits(labels=truth, logits=model.output), name="cost")
-        tf.summary.scalar("cost_summary", cost)
-
-    optimizer = tf.train.AdamOptimizer(learning_rate).minimize(cost)
+    # Define optimizer
+    optimizer = tf.train.AdamOptimizer(learning_rate).minimize(model.cost)
 
     # Define accuracy
     with tf.name_scope("accuracy_calculation"):
-        correct_prediction = tf.equal(tf.argmax(model.output, 1), tf.argmax(truth, 1), name="correct_prediction")
+        correct_prediction = tf.equal(
+            tf.argmax(model.output, 1), tf.argmax(model_truth_output, 1), name="correct_prediction")
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32), name="accuracy")
         tf.summary.scalar("accuracy_summary", accuracy)
 
@@ -62,7 +57,7 @@ def main():
             [optimizer, all_summaries],
             feed_dict={
                 model_input: batch_xs,
-                truth: batch_ys
+                model_truth_output: batch_ys
             })
 
         train_writer.add_summary(all_train_summaries, step_number)
@@ -73,7 +68,7 @@ def main():
                 all_summaries,
                 feed_dict={
                     model_input: mnist.test.images,
-                    truth: mnist.test.labels
+                    model_truth_output: mnist.test.labels
                 })
 
             test_writer.add_summary(all_test_summaries, step_number)

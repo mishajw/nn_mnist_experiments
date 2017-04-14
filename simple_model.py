@@ -8,13 +8,16 @@ parser.add_argument("--layers", type=str, default="500,10")
 
 
 class SimpleModel:
-    def __init__(self, unparsed_args, model_input):
+    def __init__(self, unparsed_args, model_input, model_truth_output):
         self.output = None
+        self.cost = None
 
         args = parser.parse_args(unparsed_args)
         layers = [int(s) for s in args.layers.split(",")]
 
         self.create_guess_component(model_input, layers)
+
+        self.create_cost_component(model_truth_output)
 
     def create_guess_component(self, model_input, layers):
         current_input = model_input
@@ -25,6 +28,11 @@ class SimpleModel:
                 current_input = tf.nn.relu(logits)
 
         self.output = self.logit_component(current_input, 10)
+
+    def create_cost_component(self, model_truth_output):
+        self.cost = tf.reduce_mean(
+            tf.nn.softmax_cross_entropy_with_logits(labels=model_truth_output, logits=self.output), name="cost")
+        tf.summary.scalar("cost_summary", self.cost)
 
     @staticmethod
     def tensor_summary(t):
