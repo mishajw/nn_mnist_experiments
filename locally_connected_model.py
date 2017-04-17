@@ -32,8 +32,8 @@ class LocallyConnectedModel(Model):
             unknown_activations = tf.fill(stack, 0.0)
             activations = tf.concat([tf.expand_dims(preprocess, 1), unknown_activations], 1)
 
-        horizontal_weights = tf.Variable(tf.zeros([width - 1, height]), name="horizontal_weights")
-        vertical_weights = tf.Variable(tf.zeros([width, height - 1]), name="vertical_weights")
+        horizontal_weights = tf.Variable(tf.random_normal([width - 1, height]), name="horizontal_weights")
+        vertical_weights = tf.Variable(tf.random_normal([width, height - 1]), name="vertical_weights")
 
         for i in range(iterations):
             with tf.name_scope("iteration" + str(i)):
