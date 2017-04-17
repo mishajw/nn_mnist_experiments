@@ -28,20 +28,21 @@ class HiddenCostsModel(Model):
 
                 layer_output = tf.nn.relu(logits)
 
-                # Get cost as if the network ends here
-                with tf.name_scope("hidden_costs_output"):
+                current_input = layer_output
+
+            # Get cost as if the network ends here
+            with tf.name_scope("hidden_costs" + str(i)):
+                with tf.name_scope("output"):
                     hidden_costs_output = tf.nn.relu(help.logit_component(layer_output, 10))
 
-                    with tf.name_scope("cost"):
-                        logits_cost = self.create_cost_component(hidden_costs_output, "hidden_cost")
+                with tf.name_scope("cost"):
+                    logits_cost = self.create_cost_component(hidden_costs_output, "hidden_cost")
 
-                        # Concat to `hidden_costs`
-                        if hidden_costs is None:
-                            hidden_costs = logits_cost
-                        else:
-                            hidden_costs = hidden_costs + logits_cost
-
-                current_input = layer_output
+                    # Concat to `hidden_costs`
+                    if hidden_costs is None:
+                        hidden_costs = logits_cost
+                    else:
+                        hidden_costs = hidden_costs + logits_cost
 
         with tf.name_scope("total_cost"):
             with tf.name_scope("hidden"):
