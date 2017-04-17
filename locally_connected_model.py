@@ -24,23 +24,44 @@ class LocallyConnectedModel(Model):
             self.create_cost_component()
 
     def create_guess_component(self, width, height, iterations):
-        activations = tf.Variable(tf.zeros([width, height]), trainable=False, name="activations")
+        with tf.name_scope("preprocess"):
+            preprocess = help.logit_component(self.input, height)
+
+        with tf.name_scope("activations_construction"):
+            stack = tf.stack([tf.shape(self.input)[0], width - 1, height])
+            unknown_activations = tf.fill(stack, 0.0)
+            activations = tf.concat([tf.expand_dims(preprocess, 1), unknown_activations], 1)
+
         horizontal_weights = tf.Variable(tf.zeros([width - 1, height]), name="horizontal_weights")
         vertical_weights = tf.Variable(tf.zeros([width, height - 1]), name="vertical_weights")
 
-        for _ in range(iterations):
-            from_left = tf.concat([horizontal_weights, tf.zeros([1, height])], 0) * activations
-            from_right = tf.concat([tf.zeros([1, height]), horizontal_weights], 0) * activations
-            from_down = tf.concat([vertical_weights, tf.zeros([width, 1])], 1) * activations
-            from_up = tf.concat([tf.zeros([width, 1]), vertical_weights], 1) * activations
+        for i in range(iterations):
+            with tf.name_scope("iteration" + str(i)):
+                from_left = tf.concat([horizontal_weights, tf.zeros([1, height])], 0) * activations
+                from_right = tf.concat([tf.zeros([1, height]), horizontal_weights], 0) * activations
+                from_down = tf.concat([vertical_weights, tf.zeros([width, 1])], 1) * activations
+                from_up = tf.concat([tf.zeros([width, 1]), vertical_weights], 1) * activations
 
-            activations = \
-                tf.concat([tf.zeros([1, height]), tf.slice(from_left, [0, 0], [width - 1, height])], 0) + \
-                tf.concat([tf.slice(from_right, [1, 0], [width - 1, height]), tf.zeros([1, height])], 0) + \
-                tf.concat([tf.zeros([width, 1]), tf.slice(from_down, [0, 0], [width, height - 1])], 1) + \
-                tf.concat([tf.slice(from_up, [0, 1], [width, height - 1]), tf.zeros([width, 1])], 1)
+                activations = \
+                    tf.concat([
+                        tf.zeros([tf.shape(self.input)[0], 1, height]),
+                        tf.slice(from_left, [0, 0, 0], [-1, width - 1, height])], 1) + \
+                    tf.concat([
+                        tf.slice(from_right, [0, 1, 0], [-1, width - 1, height]),
+                        tf.zeros([tf.shape(self.input)[0], 1, height])], 1) + \
+                    tf.concat([
+                        tf.zeros([tf.shape(self.input)[0], width, 1]),
+                        tf.slice(from_down, [0, 0, 0], [-1, width, height - 1])], 2) + \
+                    tf.concat([
+                        tf.slice(from_up, [0, 0, 1], [-1, width, height - 1]),
+                        tf.zeros([tf.shape(self.input)[0], width, 1])], 2)
 
-        self.output = help.logit_component(self.input, 10)
+                with tf.name_scope("activations_summary"):
+                    help.tensor_summary(activations)
+
+        with tf.name_scope("postprocess"):
+            locally_connected_output = tf.squeeze(tf.slice(activations, [0, width - 2, 0], [-1, 1, height]), [1])
+            self.output = help.logit_component(locally_connected_output, 10)
 
     def create_cost_component(self):
         self.cost = tf.reduce_mean(
