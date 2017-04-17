@@ -56,12 +56,18 @@ class LocallyConnectedModel(Model):
                         tf.slice(from_up, [0, 0, 1], [-1, width, height - 1]),
                         tf.zeros([tf.shape(self.input)[0], width, 1])], 2)
 
-                with tf.name_scope("activations_summary"):
-                    help.tensor_summary(activations)
-
         with tf.name_scope("postprocess"):
             locally_connected_output = tf.squeeze(tf.slice(activations, [0, width - 2, 0], [-1, 1, height]), [1])
             self.output = help.logit_component(locally_connected_output, 10)
+
+        with tf.name_scope("activations_summary"):
+            help.tensor_summary(activations)
+
+        with tf.name_scope("horizontal_weights_summary"):
+            help.tensor_summary(horizontal_weights)
+
+        with tf.name_scope("vertical_weights_summary"):
+            help.tensor_summary(vertical_weights)
 
     def create_cost_component(self):
         self.cost = tf.reduce_mean(
