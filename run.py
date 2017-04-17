@@ -3,6 +3,7 @@
 from datetime import datetime
 from simple_model import SimpleModel
 from hidden_costs_model import HiddenCostsModel
+from locally_connected_model import LocallyConnectedModel
 from tensorflow.examples.tutorials.mnist import input_data
 import argparse
 import tensorflow as tf
@@ -14,6 +15,7 @@ parser.add_argument("--learning_rate", type=float, default=0.01)
 parser.add_argument("--training_steps", type=int, default=10000)
 parser.add_argument("--display_step", type=int, default=1000)
 parser.add_argument("--hidden_costs_model", dest="model", action="store_const", const="hidden_costs_model")
+parser.add_argument("--locally_connected_model", dest="model", action="store_const", const="locally_connected_model")
 
 
 def main():
@@ -33,6 +35,8 @@ def main():
     with tf.name_scope("model"):
         if args.model == "hidden_costs_model":
             model = HiddenCostsModel(unknown_args, model_input, model_truth_output)
+        elif args.model == "locally_connected_model":
+            model = LocallyConnectedModel(unknown_args, model_input, model_truth_output)
         else:
             model = SimpleModel(unknown_args, model_input, model_truth_output)
 
