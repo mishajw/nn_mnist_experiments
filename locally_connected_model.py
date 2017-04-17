@@ -34,6 +34,8 @@ class LocallyConnectedModel(Model):
 
         horizontal_weights = tf.Variable(tf.random_normal([width - 1, height]), name="horizontal_weights")
         vertical_weights = tf.Variable(tf.random_normal([width, height - 1]), name="vertical_weights")
+        horizontal_biases = tf.Variable(tf.zeros([width - 1, height]), name="horizontal_biases")
+        vertical_biases = tf.Variable(tf.zeros([width, height - 1]), name="vertical_biases")
 
         for i in range(iterations):
             with tf.name_scope("iteration" + str(i)):
@@ -45,15 +47,15 @@ class LocallyConnectedModel(Model):
                 activations = \
                     tf.concat([
                         tf.zeros([tf.shape(self.input)[0], 1, height]),
-                        tf.slice(from_left, [0, 0, 0], [-1, width - 1, height])], 1) + \
+                        tf.slice(from_left, [0, 0, 0], [-1, width - 1, height]) + horizontal_biases], 1) + \
                     tf.concat([
-                        tf.slice(from_right, [0, 1, 0], [-1, width - 1, height]),
+                        tf.slice(from_right, [0, 1, 0], [-1, width - 1, height]) + horizontal_biases,
                         tf.zeros([tf.shape(self.input)[0], 1, height])], 1) + \
                     tf.concat([
                         tf.zeros([tf.shape(self.input)[0], width, 1]),
-                        tf.slice(from_down, [0, 0, 0], [-1, width, height - 1])], 2) + \
+                        tf.slice(from_down, [0, 0, 0], [-1, width, height - 1]) + vertical_biases], 2) + \
                     tf.concat([
-                        tf.slice(from_up, [0, 0, 1], [-1, width, height - 1]),
+                        tf.slice(from_up, [0, 0, 1], [-1, width, height - 1]) + vertical_biases,
                         tf.zeros([tf.shape(self.input)[0], width, 1])], 2)
 
         with tf.name_scope("postprocess"):
@@ -68,6 +70,12 @@ class LocallyConnectedModel(Model):
 
         with tf.name_scope("vertical_weights_summary"):
             help.tensor_summary(vertical_weights)
+
+        with tf.name_scope("horizontal_biases_summary"):
+            help.tensor_summary(horizontal_biases)
+
+        with tf.name_scope("vertical_biases_summary"):
+            help.tensor_summary(vertical_biases)
 
     def create_cost_component(self):
         self.cost = tf.reduce_mean(
