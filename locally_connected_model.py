@@ -44,7 +44,8 @@ class LocallyConnectedModel(Model):
                 from_down = tf.concat([vertical_weights, tf.zeros([width, 1])], 1) * activations
                 from_up = tf.concat([tf.zeros([width, 1]), vertical_weights], 1) * activations
 
-                activations = \
+                # TODO: Check why relu doesn't work here
+                activations = tf.nn.sigmoid( \
                     tf.concat([
                         tf.zeros([tf.shape(self.input)[0], 1, height]),
                         tf.slice(from_left, [0, 0, 0], [-1, width - 1, height]) + horizontal_biases], 1) + \
@@ -56,7 +57,7 @@ class LocallyConnectedModel(Model):
                         tf.slice(from_down, [0, 0, 0], [-1, width, height - 1]) + vertical_biases], 2) + \
                     tf.concat([
                         tf.slice(from_up, [0, 0, 1], [-1, width, height - 1]) + vertical_biases,
-                        tf.zeros([tf.shape(self.input)[0], width, 1])], 2)
+                        tf.zeros([tf.shape(self.input)[0], width, 1])], 2))
 
         with tf.name_scope("postprocess"):
             locally_connected_output = tf.squeeze(tf.slice(activations, [0, width - 2, 0], [-1, 1, height]), [1])
