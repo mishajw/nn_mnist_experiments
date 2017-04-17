@@ -14,7 +14,7 @@ class SimpleModel(Model):
         super().__init__(_input, _truth_output)
 
         args = parser.parse_args(unparsed_args)
-        layers = help.get_layers_from_args(args)
+        layers = help.get_int_list_from_string(args.layers)
 
         self.create_guess_component(layers)
 

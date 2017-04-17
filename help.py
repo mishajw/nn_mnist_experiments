@@ -37,5 +37,5 @@ def logit_component(layer_input, size):
     return logits
 
 
-def get_layers_from_args(args):
-    return [int(s) for s in args.layers.split(",")]
+def get_int_list_from_string(string):
+    return [int(s) for s in string.split(",")]
